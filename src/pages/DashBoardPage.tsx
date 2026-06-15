@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
   Grid,
   Card,
@@ -12,30 +14,28 @@ import {
   Paper,
 } from "@mui/material";
 
-import { useAppointmentStore } from "../store/appointmentStore";
+import { getAppointments } from "../api/appointmentApi";
+const location = useLocation();
+
 
 const DashboardPage = () => {
-  const appointments = useAppointmentStore(
-    (state) => state.appointments
-  );
+  const [appointments, setAppointments] = useState<any[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      const data = await getAppointments();
+      setAppointments(data);
+    };
+
+    load();
+  }, [location]);
+
 
   const stats = [
-    {
-      title: "Total Appointments",
-      value: appointments.length,
-    },
-    {
-      title: "Today's Appointments",
-      value: appointments.length,
-    },
-    {
-      title: "Upcoming",
-      value: appointments.length,
-    },
-    {
-      title: "Completed",
-      value: 0,
-    },
+    { title: "Total Appointments", value: appointments.length },
+    { title: "Today", value: appointments.length },
+    { title: "Upcoming", value: appointments.length },
+    { title: "Completed", value: 0 },
   ];
 
   return (
@@ -46,16 +46,12 @@ const DashboardPage = () => {
 
       <Grid container spacing={3}>
         {stats.map((stat) => (
-          <Grid
-            key={stat.title}
-            size={{ xs: 12, sm: 6, md: 3 }}
-          >
+          <Grid item xs={12} sm={6} md={3} key={stat.title}>
             <Card>
               <CardContent>
                 <Typography color="text.secondary">
                   {stat.title}
                 </Typography>
-
                 <Typography variant="h4">
                   {stat.value}
                 </Typography>
@@ -65,14 +61,11 @@ const DashboardPage = () => {
         ))}
       </Grid>
 
-      <Typography
-        variant="h5"
-        sx={{ mt: 4, mb: 2 }}
-      >
+      <Typography variant="h5" sx={{ mt: 4 }}>
         Appointments
       </Typography>
 
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ mt: 2 }}>
         <Table>
           <TableHead>
             <TableRow>
@@ -85,52 +78,15 @@ const DashboardPage = () => {
           </TableHead>
 
           <TableBody>
-            {appointments.length > 0 ? (
-              appointments.map(
-                (appointment) => (
-                  <TableRow
-                    key={appointment.id}
-                  >
-                    <TableCell>
-                      {appointment.title}
-                    </TableCell>
-
-                    <TableCell>
-                      {
-                        appointment.description
-                      }
-                    </TableCell>
-
-                    <TableCell>
-                      {
-                        appointment.appointmentDate
-                      }
-                    </TableCell>
-
-                    <TableCell>
-                      {
-                        appointment.appointmentTime
-                      }
-                    </TableCell>
-
-                    <TableCell>
-                      {
-                        appointment.location
-                      }
-                    </TableCell>
-                  </TableRow>
-                )
-              )
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={5}
-                  align="center"
-                >
-                  No appointments found
-                </TableCell>
+            {appointments.map((a) => (
+              <TableRow key={a.id}>
+                <TableCell>{a.title}</TableCell>
+                <TableCell>{a.description}</TableCell>
+                <TableCell>{a.appointmentDate}</TableCell>
+                <TableCell>{a.appointmentTime}</TableCell>
+                <TableCell>{a.location}</TableCell>
               </TableRow>
-            )}
+            ))}
           </TableBody>
         </Table>
       </TableContainer>

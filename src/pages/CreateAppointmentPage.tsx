@@ -5,8 +5,10 @@ import {
   Button,
   Box,
 } from "@mui/material";
-import { useAppointmentStore } from "../store/appointmentStore";
+
 import { useForm } from "react-hook-form";
+import { createAppointment } from "../api/appointmentApi";
+import { useNavigate } from "react-router-dom";
 
 interface FormData {
   title: string;
@@ -17,81 +19,38 @@ interface FormData {
 }
 
 const CreateAppointmentPage = () => {
-  const { register, handleSubmit } =
-    useForm<FormData>();
+  const { register, handleSubmit } = useForm<FormData>();
+  const navigate = useNavigate();
 
-  const addAppointment =
-    useAppointmentStore(
-      (state) => state.addAppointment
-    );
+  const onSubmit = async (data: FormData) => {
+  try {
+    await createAppointment(data);
 
-  const onSubmit = (
-    data: FormData
-  ) => {
-    addAppointment({
-      id: Date.now(),
-      ...data,
-    });
+    alert("Appointment Created");
 
-    console.log(data);
-  };
+    navigate("/");
+  } catch (err) {
+    console.log(err);
+  }
+};
   return (
     <Paper sx={{ p: 4 }}>
-      <Typography
-        variant="h5"
-        gutterBottom
-      >
+      <Typography variant="h5" gutterBottom>
         Create Appointment
       </Typography>
 
       <Box
         component="form"
-        onSubmit={handleSubmit(
-          onSubmit
-        )}
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-        }}
+        onSubmit={handleSubmit(onSubmit)}
+        sx={{ display: "flex", flexDirection: "column", gap: 2 }}
       >
-        <TextField
-          label="Title"
-          {...register("title")}
-        />
+        <TextField label="Title" {...register("title")} />
+        <TextField label="Description" {...register("description")} />
+        <TextField type="date" {...register("appointmentDate")} />
+        <TextField type="time" {...register("appointmentTime")} />
+        <TextField label="Location" {...register("location")} />
 
-        <TextField
-          label="Description"
-          {...register(
-            "description"
-          )}
-        />
-
-        <TextField
-          type="date"
-          {...register(
-            "appointmentDate"
-          )}
-        />
-
-        <TextField
-          type="time"
-          {...register(
-            "appointmentTime"
-          )}
-        />
-
-        <TextField
-          label="Location"
-          {...register(
-            "location"
-          )}
-        />
-
-        <Button
-          type="submit"
-          variant="contained"
-        >
+        <Button type="submit" variant="contained">
           Save Appointment
         </Button>
       </Box>

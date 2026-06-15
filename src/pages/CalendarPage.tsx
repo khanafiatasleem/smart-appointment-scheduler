@@ -1,19 +1,26 @@
+import { useEffect, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
+import { useLocation } from "react-router-dom";
 
-import { useAppointmentStore } from "../store/appointmentStore";
+import { getAppointments } from "../api/appointmentApi";
 
 const CalendarPage = () => {
-  const appointments = useAppointmentStore(
-    (state) => state.appointments
-  );
+  const [appointments, setAppointments] = useState<any[]>([]);
+const location = useLocation();
+  useEffect(() => {
+    const load = async () => {
+      const data = await getAppointments();
+      setAppointments(data);
+    };
 
-  const events = appointments.map(
-    (appointment) => ({
-      title: appointment.title,
-      date: appointment.appointmentDate,
-    })
-  );
+    load();
+  }, [location]);
+
+  const events = appointments.map((a) => ({
+    title: a.title,
+    date: a.appointmentDate,
+  }));
 
   return (
     <FullCalendar
